@@ -81,5 +81,14 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-	
+	return Promise.all([
+
+		knex.schema.dropTable("users"),
+		knex.schema.dropTable("events"),
+		knex.schema.dropTable("curr_contact"),
+		knex.schema.dropTable("curr_address"),
+		knex.schema.dropTable("prev_contact"),
+		knex.schema.dropTable("prev_address")
+
+	])
 };
