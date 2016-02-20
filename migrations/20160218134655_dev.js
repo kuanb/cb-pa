@@ -17,7 +17,7 @@ exports.up = function(knex, Promise) {
 			     .inTable("users");
 
 			table.dateTime("date_time");
-			table.string("authority");
+			table.string("case_num");
 			table.string("location");
 			table.string("notes");
 			table.boolean("fta");

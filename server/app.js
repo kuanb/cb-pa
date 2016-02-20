@@ -7,10 +7,7 @@ var ACCOUNT_SID = credentials.accountSid,
 // app initialization
 var express = require("express");
 var app = express();
-
-var express = require('express');  
-var app = express();  
-var db  = require('./db');
+var db  = require("./db");
 
 var port = 4000;
 app.listen(port, function () { console.log("Listening on port", port); });
