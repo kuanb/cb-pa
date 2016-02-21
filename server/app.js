@@ -24,6 +24,11 @@ app.use(session({
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
+// common response types
+var res_types = {
+	affirmative: ["Y","YE","YS","YA","YES","YEP","YUP","YEA","YEAH"]
+};
+
 app.get("/", function (req, res) {
 	res.send("Hello.")
 });
@@ -33,21 +38,32 @@ app.post("/sms", function (req, res) {
 	var from = req.body.From.replace(/\D+/g, "");
 	var text = req.body.Body.toUpperCase();
 
-	db("comm_methods").where("value", from).limit(1).then(function (row) {
-		// create a new user if this phone number has never been used
-		if (row.length == 0) {
+	db("comm_methods").where("value", from).limit(1).then(function (device) {
+		console.log(req.session.state);
 
+		if (!req.session.state) {
+			// create a new user if this phone number has never been used
+			if (device.length == 0) {
+				twiml.sms("Welcome to CourtSMS. We don't have this number on file. Reply \"YES\" to sign up for alerts.");
+				req.session.state = "request_signup";
+				res.send(twiml.toString());
+			}
+		} else {
+			if (req.session.state == "request_signup") {
+				if (res_types.affirmative.indexOf(text) > -1 && device.length == 0) {
+					db("comm_methods").returning("cid").insert({
+						type: "cell",
+						value: from
+					}).then(function () {
+						twiml.sms("Thanks. You have been signed up for notifications. Reply \"CANCEL\" at any time to opt out.");
+						req.session.state = undefined;
+					});
+				}
+			}
 		}
 
-		if (req.session.state == undefined) {
-			twiml.sms("Thanks, yo. This is what I received from you: " + text);
-			req.session.state
-		}
+		
 	});
-
-	
-	
-	res.send(twiml.toString());
 });
 
 var port = 4000;
