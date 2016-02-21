@@ -39,6 +39,8 @@ app.post("/sms", function (req, res) {
 	var text = req.body.Body.toUpperCase();
 
 	db("comm_methods").where("value", from).limit(1).then(function (device) {
+		
+		// log the current session state...
 		console.log(req.session.state);
 
 		if (!req.session.state) {
@@ -51,12 +53,15 @@ app.post("/sms", function (req, res) {
 		} else {
 			if (req.session.state == "request_signup") {
 				if (res_types.affirmative.indexOf(text) > -1 && device.length == 0) {
+					console.log("inserting...", from);
 					db("comm_methods").returning("cid").insert({
 						type: "cell",
 						value: from
 					}).then(function () {
+						console.log("hurray");
 						twiml.sms("Thanks. You have been signed up for notifications. Reply \"CANCEL\" at any time to opt out.");
 						req.session.state = undefined;
+						res.send(twiml.toString());
 					});
 				}
 			}
