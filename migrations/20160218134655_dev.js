@@ -13,8 +13,8 @@ exports.up = function(knex, Promise) {
 
 		knex.schema.createTable("events", function(table) {
 			table.integer("user")
-			     .references("uid")
-			     .inTable("users");
+					 .references("uid")
+					 .inTable("users");
 
 			table.dateTime("date_time");
 			table.string("case_num");
@@ -25,21 +25,40 @@ exports.up = function(knex, Promise) {
 			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
 
-		knex.schema.createTable("curr_contact", function(table) {
+		knex.schema.createTable("messages", function(table) {
 			table.integer("user")
-			     .references("uid")
-			     .inTable("users");
+					 .references("uid")
+					 .inTable("users");
 
-			table.string("type");
-			table.string("value");
+			table.integer("comm_method")
+					 .references("cid")
+					 .inTable("comm_methods");
+					 
+			table.string("content");
 
 			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
 
-		knex.schema.createTable("curr_address", function(table) {
+		knex.schema.createTable("comm_methods", function(table) {
+			table.increments("cid").primary();
+
 			table.integer("user")
-			     .references("uid")
-			     .inTable("users");
+					 .references("uid")
+					 .inTable("users");
+
+			table.string("name");  // e.g. Joe's Obamaphone
+			table.string("type");  // e.g. email, cell, landline
+			table.string("value"); // e.g. jim@email.com, 14542348723
+
+			table.boolean("current");
+			table.dateTime("terminated");
+			table.timestamp("created").defaultTo(knex.fn.now());
+		}),
+
+		knex.schema.createTable("address", function(table) {
+			table.integer("user")
+					 .references("uid")
+					 .inTable("users");
 
 			table.string("addr1");
 			table.string("addr2");
@@ -47,34 +66,9 @@ exports.up = function(knex, Promise) {
 			table.string("zip");
 			table.string("state");
 
+			table.boolean("current");
+			table.dateTime("terminated");
 			table.timestamp("created").defaultTo(knex.fn.now());
-		}),
-
-		knex.schema.createTable("prev_contact", function(table) {
-			table.integer("user")
-			     .references("uid")
-			     .inTable("users");
-
-			table.string("type");
-			table.string("value");
-
-			table.dateTime("terminated");
-			table.dateTime("initiated");
-		}),
-
-		knex.schema.createTable("prev_address", function(table) {
-			table.integer("user")
-			     .references("uid")
-			     .inTable("users");
-
-			table.string("addr1");
-			table.string("addr2");
-			table.string("city");
-			table.string("zip");
-			table.string("state");
-
-			table.dateTime("terminated");
-			table.dateTime("initiated");
 		})
 
 	])
@@ -85,10 +79,9 @@ exports.down = function(knex, Promise) {
 
 		knex.schema.dropTable("users"),
 		knex.schema.dropTable("events"),
-		knex.schema.dropTable("curr_contact"),
-		knex.schema.dropTable("curr_address"),
-		knex.schema.dropTable("prev_contact"),
-		knex.schema.dropTable("prev_address")
+		knex.schema.dropTable("messages"),
+		knex.schema.dropTable("comm_methods"),
+		knex.schema.dropTable("address")
 
 	])
 };
