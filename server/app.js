@@ -26,7 +26,8 @@ app.use(bodyParser.json());
 
 // common response types
 var res_types = {
-	affirmative: ["Y","YE","YS","YA","YES","YEP","YUP","YEA","YEAH"]
+	affirmative: ["Y","YE","YS","YA","YES","YEP","YUP","YEA","YEAH"],
+	negative: ["N","NO","NE","NA","NOPE","NOOPE","NAH","NAHH","NAY","NOO","NOOO"]
 };
 
 app.get("/", function (req, res) {
@@ -39,31 +40,38 @@ app.post("/sms", function (req, res) {
 	var text = req.body.Body.toUpperCase();
 
 	db("comm_methods").where("value", from).limit(1).then(function (device) {
-		
-		// log the current session state...
-		console.log(req.session.state);
 
 		if (!req.session.state) {
+
 			// create a new user if this phone number has never been used
 			if (device.length == 0) {
-				twiml.sms("Welcome to CourtSMS. We don't have this number on file. Reply \"YES\" to sign up for alerts.");
+				twiml.sms("Welcome to CourtSMS. We don't have this number on file. Reply \"YES\" to register for alerts.");
 				req.session.state = "request_signup";
 				res.send(twiml.toString());
 			}
+
 		} else {
-			if (req.session.state == "request_signup") {
-				if (res_types.affirmative.indexOf(text) > -1 && device.length == 0) {
-					console.log("inserting...", from);
-					db("comm_methods").returning("cid").insert({
-						type: "cell",
-						value: from
-					}).then(function () {
-						console.log("hurray");
-						twiml.sms("Thanks. You have been signed up for notifications. Reply \"CANCEL\" at any time to opt out.");
-						req.session.state = undefined;
-						res.send(twiml.toString());
-					});
+
+			// don't have this number in our system
+			if (device.length == 0) {
+
+				if (req.session.state == "request_signup") {
+
+					// they do want alerts
+					if (res_types.affirmative.indexOf(text) > -1) {
+						db("comm_methods").returning("comm_id").insert({
+							type: "cell",
+							value: from
+						}).then(function () {
+							twiml.sms("You\'ve signed up. Reply with the case numbers, separated by spaces, for which you want alerts. Reply \"STOP\" at any time to opt out.");
+							req.session.state = "case_signup";
+							res.send(twiml.toString());
+						});
+					}
+				
+				// the are adding case to monitor
 				}
+
 			}
 		}
 

@@ -2,7 +2,7 @@
 exports.up = function(knex, Promise) {
 	return Promise.all([
 
-		knex.schema.createTable("users", function(table) {
+		knex.schema.createTable("clients", function(table) {
 			table.increments("uid").primary();
 			table.string("first");
 			table.string("last");
@@ -12,9 +12,11 @@ exports.up = function(knex, Promise) {
 		}),
 
 		knex.schema.createTable("events", function(table) {
-			table.integer("user")
+			table.increments("event_id").primary();
+
+			table.integer("client")
 					 .references("uid")
-					 .inTable("users");
+					 .inTable("clients");
 
 			table.dateTime("date_time");
 			table.string("case_num");
@@ -26,12 +28,12 @@ exports.up = function(knex, Promise) {
 		}),
 
 		knex.schema.createTable("messages", function(table) {
-			table.integer("user")
+			table.integer("client")
 					 .references("uid")
-					 .inTable("users");
+					 .inTable("clients");
 
 			table.integer("comm_method")
-					 .references("cid")
+					 .references("comm_id")
 					 .inTable("comm_methods");
 					 
 			table.string("content");
@@ -40,25 +42,25 @@ exports.up = function(knex, Promise) {
 		}),
 
 		knex.schema.createTable("comm_methods", function(table) {
-			table.increments("cid").primary();
+			table.increments("comm_id").primary();
 
-			table.integer("user")
+			table.integer("client")
 					 .references("uid")
-					 .inTable("users");
+					 .inTable("clients");
 
-			table.string("name");  // e.g. Joe's Obamaphone
-			table.string("type");  // e.g. email, cell, landline
-			table.string("value"); // e.g. jim@email.com, 14542348723
+			table.string("type");        // e.g. email, cell, landline
+			table.string("value");       // e.g. jim@email.com, 14542348723
+			table.string("description"); // e.g. Joe's Obamaphone
 
-			table.boolean("current");
+			table.boolean("current").defaultTo(true);
 			table.dateTime("terminated");
 			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
 
 		knex.schema.createTable("address", function(table) {
-			table.integer("user")
+			table.integer("client")
 					 .references("uid")
-					 .inTable("users");
+					 .inTable("clients");
 
 			table.string("addr1");
 			table.string("addr2");
@@ -69,6 +71,18 @@ exports.up = function(knex, Promise) {
 			table.boolean("current");
 			table.dateTime("terminated");
 			table.timestamp("created").defaultTo(knex.fn.now());
+		}),
+
+		knex.schema.createTable("alerts", function(table) {
+			table.integer("comm_method")
+					 .references("comm_id")
+					 .inTable("comm_methods");
+
+			table.integer("event")
+					 .references("event_id")
+					 .inTable("events");
+
+			table.timestamp("created").defaultTo(knex.fn.now());
 		})
 
 	])
@@ -77,7 +91,7 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
 	return Promise.all([
 
-		knex.schema.dropTable("users"),
+		knex.schema.dropTable("clients"),
 		knex.schema.dropTable("events"),
 		knex.schema.dropTable("messages"),
 		knex.schema.dropTable("comm_methods"),
