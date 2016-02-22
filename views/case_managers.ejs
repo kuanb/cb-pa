@@ -5,7 +5,7 @@
 	<b>Active case managers</b>
 	<ul>
 		<% for (var i = 0; i < rows.length; i++ ) { %>
-			<li><%= JSON.stringify(rows[i]) %></li>
+			<li><a href="case_managers/<%= rows[i].cmid %>"><%= rows[i].first + " " + rows[i].last %></a></li>
 		<% } %>
 	</ul>
 

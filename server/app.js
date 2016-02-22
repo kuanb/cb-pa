@@ -60,6 +60,12 @@ app.post("/case_managers", function (req, res) {
 	}
 });
 
+app.get("/case_managers/:cmid", function (req, res) {
+	db("clients").where("case_manager", req.params.cmid).limit(1).then(function (rows) {
+		res.send(rows);
+	});
+});
+
 app.post("/sms", function (req, res) {
 	var twiml = new twilio.TwimlResponse();
 	var from = req.body.From.replace(/\D+/g, "");
