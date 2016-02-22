@@ -9,11 +9,13 @@ var express = require("express");
 var app = express();
 var db  = require("./db");
 
-// twilio-related dependencies
+// dependencies
 var twilio = require("twilio");
 var bodyParser = require('body-parser');
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
+
+app.set('view engine', 'ejs');
 
 app.use(cookieParser());
 app.use(session({
@@ -30,8 +32,32 @@ var res_types = {
 	negative: ["N","NO","NE","NA","NOPE","NOOPE","NAH","NAHH","NAY","NOO","NOOO"]
 };
 
-app.get("/", function (req, res) {
-	res.send("Hello.")
+app.get("/case_managers", function (req, res) {
+	var offset = req.query.offset;
+	if (!offset) { offset = 0; }
+
+	db("case_managers").limit(25).offset(offset).then(function (rows) {
+		res.render("case_managers", {rows: rows});
+	});
+});
+
+app.post("/case_managers", function (req, res) {
+	var first = req.body.first,
+	    last = req.body.last;
+
+	// test that they are valid entries
+	var strings_ok = typeof first == "string" && typeof last == "string";
+	var lengths_ok = first.length > 1 && last.length > 1;
+	if (strings_ok && lengths_ok) {
+		db("case_managers").insert({
+			first: first,
+			last: last
+		}).then(function () {
+			res.send("Success. Return to <a href=\"/case_managers\">all case managers view</a>.");
+		});
+	} else {
+		res.send("Bad submission. Go <a href=\"/case_managers\">back</a> and try again.");
+	}
 });
 
 app.post("/sms", function (req, res) {

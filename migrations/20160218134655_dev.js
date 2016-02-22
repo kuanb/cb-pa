@@ -2,13 +2,32 @@
 exports.up = function(knex, Promise) {
 	return Promise.all([
 
+
+		knex.schema.createTable("case_managers", function(table) {
+			table.increments("cmid").primary();
+
+			table.string("first");
+			table.string("last");
+			table.boolean("active").defaultTo(true);
+			
+			table.timestamp("updated");
+			table.timestamp("created").defaultTo(knex.fn.now());
+		}),
+
 		knex.schema.createTable("clients", function(table) {
 			table.increments("uid").primary();
+
+			table.integer("case_manager")
+					 .references("cmid")
+					 .inTable("case_managers");
+
 			table.string("first");
 			table.string("last");
 			table.string("otn");
 			table.string("so");
-			table.timestamps();
+
+			table.timestamp("updated");
+			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
 
 		knex.schema.createTable("events", function(table) {
@@ -32,6 +51,10 @@ exports.up = function(knex, Promise) {
 					 .references("uid")
 					 .inTable("clients");
 
+			table.integer("case_manager")
+					 .references("cmid")
+					 .inTable("case_managers");
+
 			table.integer("comm_method")
 					 .references("comm_id")
 					 .inTable("comm_methods");
@@ -51,8 +74,8 @@ exports.up = function(knex, Promise) {
 			table.string("type");        // e.g. email, cell, landline
 			table.string("value");       // e.g. jim@email.com, 14542348723
 			table.string("description"); // e.g. Joe's Obamaphone
-
 			table.boolean("current").defaultTo(true);
+
 			table.dateTime("terminated");
 			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
@@ -68,7 +91,7 @@ exports.up = function(knex, Promise) {
 			table.string("zip");
 			table.string("state");
 
-			table.boolean("current");
+			table.boolean("current").defaultTo(true);
 			table.dateTime("terminated");
 			table.timestamp("created").defaultTo(knex.fn.now());
 		}),
@@ -95,7 +118,8 @@ exports.down = function(knex, Promise) {
 		knex.schema.dropTable("events"),
 		knex.schema.dropTable("messages"),
 		knex.schema.dropTable("comm_methods"),
-		knex.schema.dropTable("address")
+		knex.schema.dropTable("address"),
+		knex.schema.dropTable("case_managers")
 
 	])
 };

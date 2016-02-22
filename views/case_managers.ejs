@@ -1,0 +1,23 @@
+<% include header %>
+
+<div class="core">
+
+	<b>Active case managers</b>
+	<ul>
+		<% for (var i = 0; i < rows.length; i++ ) { %>
+			<li><%= JSON.stringify(rows[i]) %></li>
+		<% } %>
+	</ul>
+
+	<form method="post">
+		<b>Create a new case manager</b>
+		<div>
+			<input type="text" name="first" placeholder="First Name">
+		</div>
+		<div>
+			<input type="text" name="last" placeholder="Last Name">
+		</div>
+		<input type="submit" value="Create">
+	</form>
+
+</div>
