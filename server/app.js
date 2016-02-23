@@ -32,6 +32,10 @@ var res_types = {
 	negative: ["N","NO","NE","NA","NOPE","NOOPE","NAH","NAHH","NAY","NOO","NOOO"]
 };
 
+app.get("/", function (req, res) {
+	res.render("index");
+});
+
 app.get("/case_managers", function (req, res) {
 	var offset = req.query.offset;
 	if (!offset) { offset = 0; }
