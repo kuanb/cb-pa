@@ -36,6 +36,46 @@ app.get("/", function (req, res) {
 	res.render("index");
 });
 
+app.get("/clients", function (req, res) {
+	var offset = req.query.offset;
+	if (!offset) { offset = 0; }
+
+	db("clients").limit(25).offset(offset).then(function (rows_clients) {
+		db("case_managers").then(function (rows_case_managers) {
+			res.render("clients", {clients: rows_clients, case_managers: rows_case_managers});
+		});
+	});
+});
+
+app.post("/clients", function (req, res) {
+	var first = req.body.first,
+	    last = req.body.last,
+	    otn = req.body.otn,
+	    so = req.body.so,
+	    case_manager = req.body.cm;
+console.log(case_manager);
+	// test that they are valid entries
+	var strings_ok = typeof first == "string" && typeof last == "string";
+	var lengths_ok = first.length > 1 && last.length > 1;
+
+	var insert = {
+		first: first,
+		last: last
+	};
+
+	if (typeof otn == "string" && otn.length > 0) insert["otn"] = otn;
+	if (typeof so == "string" && so.length > 0) insert["so"] = so;
+	if (typeof case_manager == "string" && case_manager.length > 0) insert["case_manager"] = case_manager;
+console.log(insert["case_manager"] );
+	if (strings_ok && lengths_ok) {
+		db("clients").insert(insert).then(function () {
+			res.send("Success. Return to <a href=\"/clients\">all clients view</a>.");
+		});
+	} else {
+		res.send("Bad submission. Go <a href=\"/clients\">back</a> and try again.");
+	}
+});
+
 app.get("/case_managers", function (req, res) {
 	var offset = req.query.offset;
 	if (!offset) { offset = 0; }

@@ -1,0 +1,54 @@
+<% include header %>
+
+<div class="core">
+
+	<b>Clients</b>
+	<table>
+		<tr>
+			<th>Last Name</th>
+			<th>First Name</th>
+			<th>OTN</th>
+			<th>SO</th>
+			<th>Case Manager</th>
+		</tr>
+			<% for (var i = 0; i < clients.length; i++) { %>
+				<tr>
+					<td><%= clients[i].last %></td>
+					<td><%= clients[i].first %></td>
+					<td><%= clients[i].otn %></td>
+					<td><%= clients[i].so %></td>
+					<% if (clients[i].case_manager == null) { %>
+						<td>-</td>
+					<% } else { %>
+						<td><a href="/case_managers/<%= clients[i].case_manager %>"><%= clients[i].case_manager %></a></td>
+					<% } %>
+				</tr>
+			<% } %>
+	</table>
+
+	<form method="post">
+		<b>Create a new client</b>
+		<div>
+			<input type="text" name="first" placeholder="First Name" required>
+		</div>
+		<div>
+			<input type="text" name="last" placeholder="Last Name" required>
+		</div>
+		<div>
+			<input type="text" name="otn" placeholder="Offender Tracking Number">
+		</div>
+		<div>
+			<input type="text" name="so" placeholder="Sheriff Number">
+		</div>
+		<div>
+			<select name="cm">
+				<option value="" selected>Case manager (optional)</option>
+				<% for (var i = 0; i < case_managers.length; i++) { %>
+					<option value="<%= case_managers[i].cmid %>"><%= case_managers[i].first %> <%= case_managers[i].last %></option>
+				<% } %>
+			</select>
+		</div>
+		<input type="submit" value="Create">
+	</form>
+
+</div>
