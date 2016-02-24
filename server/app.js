@@ -66,7 +66,7 @@ console.log(case_manager);
 	if (typeof otn == "string" && otn.length > 0) insert["otn"] = otn;
 	if (typeof so == "string" && so.length > 0) insert["so"] = so;
 	if (typeof case_manager == "string" && case_manager.length > 0) insert["case_manager"] = case_manager;
-console.log(insert["case_manager"] );
+
 	if (strings_ok && lengths_ok) {
 		db("clients").insert(insert).then(function () {
 			res.send("Success. Return to <a href=\"/clients\">all clients view</a>.");
